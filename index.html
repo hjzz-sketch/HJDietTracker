@@ -1,0 +1,2458 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>饮食&运动</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f0f0f;
+        --surface: #181818;
+        --surface2: #222222;
+        --border: #2a2a2a;
+        --accent: #c8f060;
+        --accent2: #60c8f0;
+        --text: #f0f0f0;
+        --text2: #888;
+        --text3: #555;
+        --protein: #f06060;
+        --fat: #f0c060;
+        --carb: #60c8f0;
+        --fiber: #a0d080;
+        --cal: #c8f060;
+        --radius: 14px;
+        --radius-sm: 8px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        min-height: 100vh;
+      }
+
+      /* Layout */
+      .app {
+        max-width: 480px;
+        margin: 0 auto;
+        padding-bottom: 80px;
+      }
+      .header {
+        padding: 24px 20px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-title {
+        font-family: "DM Serif Display", serif;
+        font-size: 26px;
+        letter-spacing: -0.5px;
+      }
+      .header-date {
+        font-size: 13px;
+        color: var(--text2);
+        margin-top: 2px;
+      }
+
+      /* Nav */
+      .nav {
+        display: flex;
+        gap: 4px;
+        padding: 0 20px 16px;
+      }
+      .nav-btn {
+        flex: 1;
+        padding: 8px 0;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: none;
+        color: var(--text2);
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .nav-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #000;
+        font-weight: 600;
+      }
+
+      /* Date strip */
+      .date-strip {
+        display: flex;
+        gap: 6px;
+        padding: 0 20px 16px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .date-strip::-webkit-scrollbar {
+        display: none;
+      }
+      .date-chip {
+        min-width: 52px;
+        padding: 8px 4px;
+        border-radius: 12px;
+        border: 1.5px solid var(--border);
+        background: none;
+        color: var(--text2);
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .date-chip .day-name {
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .date-chip .day-num {
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--text);
+      }
+      .date-chip.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #000;
+      }
+      .date-chip.active .day-name,
+      .date-chip.active .day-num {
+        color: #000;
+      }
+      .date-chip.has-data {
+        border-color: var(--accent2);
+      }
+
+      /* Cards */
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        margin: 0 16px 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .card-header {
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .add-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--accent);
+        border: none;
+        color: #000;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+      }
+
+      /* Summary ring */
+      .summary-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        margin: 0 16px 12px;
+        padding: 20px 16px;
+        border: 1px solid var(--border);
+      }
+      .summary-top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .ring-wrap {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        flex-shrink: 0;
+      }
+      .ring-wrap svg {
+        transform: rotate(-90deg);
+      }
+      .ring-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+      .ring-kcal {
+        font-family: "DM Serif Display", serif;
+        font-size: 20px;
+        line-height: 1;
+      }
+      .ring-label {
+        font-size: 10px;
+        color: var(--text2);
+        margin-top: 2px;
+      }
+      .macros-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .macro-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .macro-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .macro-name {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .macro-val {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .macro-bar-bg {
+        height: 5px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+      }
+      .macro-bar {
+        height: 100%;
+        border-radius: 3px;
+        transition:
+          width 0.5s ease,
+          background 0.3s ease;
+        position: relative;
+        max-width: 100%;
+      }
+      /* Over-target overflow indicator */
+      .macro-over-bar {
+        position: absolute;
+        top: 0;
+        height: 5px;
+        border-radius: 0 3px 3px 0;
+        opacity: 0.9;
+        transition: width 0.5s ease;
+      }
+      /* Target endpoint tick mark */
+      .macro-bar-wrap {
+        position: relative;
+        overflow: visible;
+      }
+      .macro-target-tick {
+        position: absolute;
+        right: 0;
+        top: -3px;
+        width: 2px;
+        height: 11px;
+        background: var(--text3);
+        border-radius: 1px;
+        opacity: 0.4;
+      }
+      .macro-target-label {
+        font-size: 10px;
+        color: var(--text3);
+        font-weight: 400;
+      }
+      .macro-over-badge {
+        font-size: 10px;
+        font-weight: 700;
+        margin-left: 3px;
+        padding: 1px 4px;
+        border-radius: 4px;
+        vertical-align: middle;
+        background: rgba(240, 96, 96, 0.18);
+        color: #f06060;
+      }
+
+      /* Meal items */
+      .meal-item {
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-top: 1px solid var(--border);
+      }
+      .meal-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+      }
+      .meal-name {
+        flex: 1;
+        font-size: 14px;
+      }
+      .meal-weight {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .meal-kcal {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--cal);
+      }
+      .meal-del {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: none;
+        color: var(--text3);
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .meal-edit {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: none;
+        color: var(--accent2);
+        font-size: 11px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .empty-meal {
+        padding: 14px 16px;
+        color: var(--text3);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      /* Modal */
+      .modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        display: flex;
+        align-items: flex-end;
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      .modal-bg.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--surface);
+        border-radius: 20px 20px 0 0;
+        padding: 20px;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 85vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      .modal::-webkit-scrollbar {
+        width: 4px;
+      }
+      .modal::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .modal::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+      .modal::-webkit-scrollbar-thumb:hover {
+        background: var(--text3);
+      }
+      .modal-bg.open .modal {
+        transform: translateY(0);
+      }
+      .modal-title {
+        font-family: "DM Serif Display", serif;
+        font-size: 22px;
+        margin-bottom: 16px;
+      }
+      .modal-close {
+        float: right;
+        background: var(--surface2);
+        border: none;
+        color: var(--text2);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      /* Search */
+      .search-wrap {
+        position: relative;
+        margin-bottom: 12px;
+      }
+      .search-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .search-input:focus {
+        border-color: var(--accent);
+      }
+      .food-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      .food-list::-webkit-scrollbar {
+        width: 4px;
+      }
+      .food-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .food-list::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+      .food-list::-webkit-scrollbar-thumb:hover {
+        background: var(--text3);
+      }
+      .food-opt {
+        padding: 10px 12px;
+        background: var(--surface2);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1.5px solid transparent;
+        transition: border-color 0.15s;
+      }
+      .food-opt:hover,
+      .food-opt.selected {
+        border-color: var(--accent);
+      }
+      .food-opt-name {
+        font-size: 14px;
+      }
+      .food-opt-cat {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+      .food-opt-macro {
+        font-size: 11px;
+        color: var(--text2);
+        text-align: right;
+      }
+
+      /* Weight input */
+      .weight-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .weight-input {
+        flex: 1;
+        padding: 12px 16px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 22px;
+        font-weight: 600;
+        outline: none;
+        text-align: center;
+        transition: border-color 0.2s;
+      }
+      .weight-input:focus {
+        border-color: var(--accent);
+      }
+      .weight-unit {
+        font-size: 14px;
+        color: var(--text2);
+      }
+      .preview-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .preview-chip {
+        flex: 1;
+        background: var(--surface2);
+        border-radius: var(--radius-sm);
+        padding: 8px;
+        text-align: center;
+      }
+      .preview-chip .pv {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .preview-chip .pl {
+        font-size: 10px;
+        color: var(--text2);
+        margin-top: 2px;
+      }
+      .confirm-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: #000;
+        font-family: "DM Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .confirm-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Custom food */
+      .custom-toggle {
+        font-size: 13px;
+        color: var(--accent2);
+        cursor: pointer;
+        margin-bottom: 10px;
+        display: inline-block;
+      }
+      .custom-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+        width: 100%;
+        overflow: hidden;
+      }
+      .custom-row {
+        display: flex;
+        gap: 8px;
+      }
+      .custom-input {
+        flex: 1;
+        padding: 10px 12px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        outline: none;
+      }
+      .custom-input:focus {
+        border-color: var(--accent2);
+      }
+      .custom-input::placeholder {
+        color: var(--text3);
+      }
+
+      /* Profile modal */
+      .profile-row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      .profile-label {
+        font-size: 12px;
+        color: var(--text2);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+      .profile-input {
+        padding: 11px 14px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        outline: none;
+        width: 100%;
+      }
+      .profile-input:focus {
+        border-color: var(--accent);
+      }
+
+      /* Analysis */
+      .analysis-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        margin: 0 16px 12px;
+        padding: 16px;
+        border: 1px solid var(--border);
+      }
+      .analysis-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--surface2);
+        border: 1.5px solid var(--accent2);
+        border-radius: var(--radius-sm);
+        color: var(--accent2);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .analysis-btn:hover {
+        background: var(--accent2);
+        color: #000;
+      }
+      .analysis-result {
+        font-size: 14px;
+        line-height: 1.75;
+        color: var(--text);
+        white-space: pre-wrap;
+      }
+      .analysis-result strong {
+        color: var(--accent);
+      }
+      .apikey-input {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        outline: none;
+        margin-bottom: 10px;
+      }
+      .apikey-input:focus {
+        border-color: var(--accent2);
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--text3);
+        line-height: 1.5;
+      }
+      /* Chart */
+      .chart-wrap {
+        position: relative;
+        height: 180px;
+        margin: 4px 0 8px;
+      }
+      .chart-canvas {
+        width: 100%;
+        height: 100%;
+      }
+      .seg-ctrl {
+        display: flex;
+        background: var(--surface2);
+        border-radius: 8px;
+        padding: 2px;
+        gap: 2px;
+      }
+      .seg-btn {
+        padding: 5px 12px;
+        border: none;
+        border-radius: 6px;
+        background: none;
+        color: var(--text2);
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .seg-btn.active {
+        background: var(--surface);
+        color: var(--text);
+        font-weight: 600;
+      }
+      /* AI result modal */
+      .ai-modal {
+        background: var(--surface);
+        border-radius: 20px 20px 0 0;
+        padding: 20px;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 88vh;
+        overflow-y: auto;
+      }
+      .modal-bg.open .ai-modal {
+        transform: translateY(0);
+      }
+
+      /* Bottom nav */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        display: flex;
+        max-width: 480px;
+        margin: 0 auto;
+        z-index: 50;
+      }
+      .bottom-nav-btn {
+        flex: 1;
+        padding: 12px 0 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        background: none;
+        border: none;
+        color: var(--text3);
+        font-family: "DM Sans", sans-serif;
+        font-size: 10px;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .bottom-nav-btn.active {
+        color: var(--accent);
+      }
+      .bottom-nav-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      /* Calendar */
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        padding: 0 16px 16px;
+      }
+      .cal-day-label {
+        text-align: center;
+        font-size: 11px;
+        color: var(--text3);
+        padding: 4px 0;
+      }
+      .cal-cell {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 1px solid transparent;
+        font-size: 13px;
+        position: relative;
+        background: var(--surface);
+        transition: all 0.15s;
+      }
+      .cal-cell.empty {
+        background: transparent;
+        cursor: default;
+      }
+      .cal-cell.today {
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .cal-cell.selected {
+        background: var(--accent);
+        color: #000;
+        font-weight: 700;
+      }
+      .cal-cell.has-data::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--accent2);
+      }
+      .cal-cell.selected::after {
+        background: #000;
+      }
+      .cal-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 20px 12px;
+      }
+      .cal-nav-btn {
+        background: var(--surface2);
+        border: none;
+        color: var(--text);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cal-month {
+        font-family: "DM Serif Display", serif;
+        font-size: 20px;
+      }
+
+      .section-title {
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 4px 20px 8px;
+      }
+
+      /* Micronutrients */
+      .micro-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .micro-chip {
+        background: var(--surface2);
+        border-radius: 8px;
+        padding: 7px 8px;
+        text-align: center;
+      }
+      .micro-chip .mv {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .micro-chip .ml {
+        font-size: 10px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+      .micro-section-title {
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin: 12px 0 6px;
+      }
+
+      /* Spinner */
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Tab content */
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      .profile-icon-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        color: var(--text2);
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ── Sub-tabs ──────────────────────────────────────────────────── */
+      .sub-nav {
+        display: flex;
+        gap: 8px;
+        padding: 0 16px 12px;
+      }
+      .sub-btn {
+        flex: 1;
+        padding: 8px 0;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: none;
+        color: var(--text2);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .sub-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #000;
+        font-weight: 600;
+      }
+      .sub-content {
+        display: none;
+      }
+      .sub-content.active {
+        display: block;
+      }
+
+      /* ── Calendar multi-dot ────────────────────────────────────────── */
+      .cal-dots {
+        display: flex;
+        justify-content: center;
+        gap: 2px;
+        margin-top: 3px;
+        min-height: 5px;
+      }
+      .cal-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+      }
+      .dot-diet {
+        background: #c8f060;
+      }
+      .dot-workout {
+        background: #60f0a0;
+      }
+      .dot-sleep {
+        background: #60c8f0;
+      }
+      .dot-period {
+        background: #f06080;
+      }
+
+      /* ── Module placeholder ────────────────────────────────────────── */
+      .module-placeholder {
+        margin: 16px;
+        padding: 32px 20px;
+        background: var(--surface);
+        border: 1.5px dashed var(--border);
+        border-radius: var(--radius);
+        text-align: center;
+        color: var(--text3);
+        font-size: 14px;
+        line-height: 1.8;
+      }
+      /* ── Login screen ──────────────────────────────────────────────── */
+      .login-screen {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 24px;
+        gap: 0;
+      }
+      .login-screen.hidden {
+        display: none;
+      }
+      .login-logo {
+        margin-bottom: 8px;
+      }
+      .login-title {
+        font-family: "DM Serif Display", serif;
+        font-size: 28px;
+        margin-bottom: 6px;
+        text-align: center;
+      }
+      .login-sub {
+        font-size: 13px;
+        color: var(--text3);
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .login-card {
+        width: 100%;
+        max-width: 360px;
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .login-label {
+        font-size: 11px;
+        color: var(--text2);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 4px;
+      }
+      .login-input {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+      .login-input:focus {
+        border-color: var(--accent);
+      }
+      .login-btn {
+        width: 100%;
+        padding: 13px;
+        background: var(--accent);
+        border: none;
+        border-radius: 10px;
+        color: #000;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: opacity 0.15s;
+      }
+      .login-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .login-btn.secondary {
+        background: none;
+        border: 1.5px solid var(--border);
+        color: var(--text2);
+        font-weight: 500;
+        margin-top: 0;
+      }
+      .login-err {
+        font-size: 12px;
+        color: #f06060;
+        text-align: center;
+        min-height: 18px;
+      }
+      .login-switch {
+        font-size: 13px;
+        color: var(--accent2);
+        text-align: center;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Login screen ───────────────────────────────────────────────── -->
+    <div class="login-screen" id="loginScreen">
+      <div class="login-logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect width="48" height="48" rx="14" fill="#1a1a1a" />
+          <rect x="6" y="22" width="8" height="20" rx="3" fill="#c8f060" />
+          <rect x="20" y="14" width="8" height="28" rx="3" fill="#c8f060" />
+          <rect
+            x="34"
+            y="8"
+            width="8"
+            height="34"
+            rx="3"
+            fill="#c8f060"
+            opacity="0.6"
+          />
+        </svg>
+      </div>
+      <div class="login-title">饮食&运动&睡眠</div>
+      <div class="login-sub" id="loginSubtitle">
+        输入 ID 直接进入，填写密码则加密保护
+      </div>
+
+      <div class="login-card">
+        <div>
+          <div class="login-label">用户 ID</div>
+          <input
+            class="login-input"
+            id="loginId"
+            type="text"
+            placeholder="英文小写 + 数字"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            oninput="
+              this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '')
+            "
+          />
+        </div>
+        <div>
+          <div class="login-label">密码（可选）</div>
+          <input
+            class="login-input"
+            id="loginPwd"
+            type="password"
+            placeholder="不填则无需密码"
+            autocomplete="current-password"
+            onkeydown="if (event.key === 'Enter') doLogin();"
+            oninput="_onPwdInput()"
+          />
+        </div>
+        <div id="loginConfirmWrap" style="display: none">
+          <div class="login-label">确认密码</div>
+          <input
+            class="login-input"
+            id="loginPwdConfirm"
+            type="password"
+            placeholder="再次输入密码"
+            onkeydown="if (event.key === 'Enter') doLogin();"
+          />
+        </div>
+        <div class="login-err" id="loginErr"></div>
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">
+          进入
+        </button>
+      </div>
+    </div>
+
+    <div class="app" id="mainApp" style="display: none">
+      <div class="header" style="position: relative; justify-content: center">
+        <!-- Left: tracker icon -->
+        <button
+          class="profile-icon-btn"
+          onclick="openTrackerModal()"
+          style="
+            position: absolute;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect x="1" y="3" width="4" height="16" rx="1.5" fill="#c8f060" />
+            <rect x="7" y="6" width="4" height="13" rx="1.5" fill="#c8f060" />
+            <rect
+              x="13"
+              y="10"
+              width="4"
+              height="9"
+              rx="1.5"
+              fill="#c8f060"
+              opacity="0.75"
+            />
+          </svg>
+        </button>
+        <!-- Center: title -->
+        <div style="text-align: center">
+          <div class="header-title">饮食&运动&睡眠</div>
+          <div class="header-date" id="headerDate"></div>
+        </div>
+        <!-- Right: settings -->
+        <button
+          class="profile-icon-btn"
+          onclick="openProfile()"
+          style="position: absolute; right: 20px"
+        >
+          ⚙
+        </button>
+      </div>
+
+      <!-- Bottom nav tabs -->
+      <div class="tab-content active" id="tab-today">
+        <!-- Date strip -->
+        <div class="date-strip" id="dateStrip"></div>
+
+        <!-- Sub-tab nav -->
+        <div class="sub-nav">
+          <button
+            class="sub-btn active"
+            id="sub-diet"
+            onclick="switchSub('diet')"
+          >
+            饮食
+          </button>
+          <button
+            class="sub-btn"
+            id="sub-workout"
+            onclick="switchSub('workout')"
+          >
+            运动
+          </button>
+          <button class="sub-btn" id="sub-sleep" onclick="switchSub('sleep')">
+            睡眠
+          </button>
+        </div>
+
+        <!-- 饮食 sub-content -->
+        <div class="sub-content active" id="subcontent-diet">
+          <!-- Summary -->
+          <div class="summary-card" id="summaryCard">
+            <div class="summary-top">
+              <div class="ring-wrap">
+                <svg width="90" height="90" viewBox="0 0 90 90">
+                  <circle
+                    cx="45"
+                    cy="45"
+                    r="38"
+                    fill="none"
+                    stroke="#2a2a2a"
+                    stroke-width="8"
+                  />
+                  <circle
+                    cx="45"
+                    cy="45"
+                    r="38"
+                    fill="none"
+                    stroke="#c8f060"
+                    stroke-width="8"
+                    stroke-linecap="round"
+                    stroke-dasharray="238.76"
+                    stroke-dashoffset="238.76"
+                    id="calRing"
+                    style="transition: stroke-dashoffset 0.6s ease"
+                  />
+                </svg>
+                <div class="ring-center">
+                  <div class="ring-kcal" id="ringKcal">0</div>
+                  <div class="ring-label">kcal</div>
+                </div>
+              </div>
+              <div class="macros-col">
+                <div class="macro-row">
+                  <div class="macro-top">
+                    <span class="macro-name">蛋白质</span
+                    ><span
+                      class="macro-val"
+                      id="proteinVal"
+                      style="color: var(--protein)"
+                      >0g</span
+                    >
+                  </div>
+                  <div class="macro-bar-wrap">
+                    <div class="macro-bar-bg">
+                      <div
+                        class="macro-bar"
+                        id="proteinBar"
+                        style="background: var(--protein); width: 0%"
+                      ></div>
+                    </div>
+                    <div class="macro-target-tick" id="proteinTick"></div>
+                  </div>
+                </div>
+                <div class="macro-row">
+                  <div class="macro-top">
+                    <span class="macro-name">脂肪</span
+                    ><span
+                      class="macro-val"
+                      id="fatVal"
+                      style="color: var(--fat)"
+                      >0g</span
+                    >
+                  </div>
+                  <div class="macro-bar-wrap">
+                    <div class="macro-bar-bg">
+                      <div
+                        class="macro-bar"
+                        id="fatBar"
+                        style="background: var(--fat); width: 0%"
+                      ></div>
+                    </div>
+                    <div class="macro-target-tick" id="fatTick"></div>
+                  </div>
+                </div>
+                <div class="macro-row">
+                  <div class="macro-top">
+                    <span class="macro-name">碳水</span
+                    ><span
+                      class="macro-val"
+                      id="carbVal"
+                      style="color: var(--carb)"
+                      >0g</span
+                    >
+                  </div>
+                  <div class="macro-bar-wrap">
+                    <div class="macro-bar-bg">
+                      <div
+                        class="macro-bar"
+                        id="carbBar"
+                        style="background: var(--carb); width: 0%"
+                      ></div>
+                    </div>
+                    <div class="macro-target-tick" id="carbTick"></div>
+                  </div>
+                </div>
+                <!-- Fiber row -->
+                <div class="macro-row">
+                  <div class="macro-top">
+                    <span class="macro-name">膳食纤维</span
+                    ><span
+                      class="macro-val"
+                      id="fiberVal"
+                      style="color: var(--fiber)"
+                      >0g</span
+                    >
+                  </div>
+                  <div class="macro-bar-wrap">
+                    <div class="macro-bar-bg">
+                      <div
+                        class="macro-bar"
+                        id="fiberBar"
+                        style="background: var(--fiber); width: 0%"
+                      ></div>
+                    </div>
+                    <div class="macro-target-tick" id="fiberTick"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supplement checklist -->
+          <div
+            id="supplementCard"
+            style="
+              margin: 0 16px 10px;
+              background: var(--surface);
+              border-radius: var(--radius);
+              border: 1px solid var(--border);
+              padding: 10px 14px;
+            "
+          >
+            <div
+              style="
+                font-size: 12px;
+                color: var(--text3);
+                margin-bottom: 8px;
+                font-weight: 500;
+              "
+            >
+              今日补剂
+            </div>
+            <div
+              id="supplementList"
+              style="display: flex; flex-direction: column; gap: 6px"
+            ></div>
+          </div>
+
+          <!-- Meals -->
+          <div id="mealsContainer"></div>
+        </div>
+        <!-- /subcontent-diet -->
+
+        <!-- 运动 sub-content -->
+        <div class="sub-content" id="subcontent-workout">
+          <div id="workoutContainer" class="module-placeholder">
+            <div style="font-size: 28px; margin-bottom: 8px">🏋️</div>
+            <div style="color: var(--text2); font-weight: 500">运动记录</div>
+            <div style="font-size: 12px; margin-top: 4px">加载中…</div>
+          </div>
+        </div>
+
+        <!-- 睡眠 sub-content -->
+        <div class="sub-content" id="subcontent-sleep">
+          <div id="sleepContainer" class="module-placeholder">
+            <div style="font-size: 28px; margin-bottom: 8px">🌙</div>
+            <div style="color: var(--text2); font-weight: 500">睡眠记录</div>
+            <div style="font-size: 12px; margin-top: 4px">加载中…</div>
+          </div>
+        </div>
+      </div>
+      <!-- /tab-today -->
+
+      <!-- Calendar tab -->
+      <div class="tab-content" id="tab-calendar">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+          <div class="cal-month" id="calMonth"></div>
+          <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div id="calDayDetail"></div>
+      </div>
+
+      <!-- Analysis tab -->
+      <div class="tab-content" id="tab-analysis">
+        <div class="section-title" style="padding-top: 12px">趋势图</div>
+        <div class="analysis-card">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 12px;
+            "
+          >
+            <div class="seg-ctrl" id="chartRangeSeg">
+              <button class="seg-btn active" onclick="setChartRange(7, this)">
+                7天
+              </button>
+              <button class="seg-btn" onclick="setChartRange(30, this)">
+                30天
+              </button>
+            </div>
+            <div style="display: flex; gap: 12px">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 5px;
+                  font-size: 11px;
+                  color: var(--text2);
+                "
+              >
+                <div
+                  style="
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--cal);
+                  "
+                ></div>
+                热量
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 5px;
+                  font-size: 11px;
+                  color: var(--text2);
+                "
+              >
+                <div
+                  style="
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--accent2);
+                  "
+                ></div>
+                体重
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="trendChart" class="chart-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- 指标趋势图 -->
+        <div
+          class="section-title"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 20px;
+          "
+        >
+          <span>指标趋势</span>
+          <div class="seg-ctrl" id="trackerRangeSeg">
+            <button
+              class="seg-btn active"
+              onclick="setTrackerChartRange(30, this)"
+            >
+              30天
+            </button>
+            <button class="seg-btn" onclick="setTrackerChartRange(90, this)">
+              90天
+            </button>
+          </div>
+        </div>
+        <div class="analysis-card">
+          <div
+            id="trackerChartLegend"
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
+              margin-bottom: 10px;
+            "
+          ></div>
+          <div id="trackerChartWrap" class="chart-wrap">
+            <canvas id="trackerChart" class="chart-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="section-title">AI 营养分析</div>
+        <div class="analysis-card">
+          <div class="hint" style="margin-bottom: 10px">
+            输入 Deepseek API Key，获得基于近 7 天饮食的个性化营养建议。
+          </div>
+          <input
+            class="apikey-input"
+            id="apiKeyInput"
+            type="password"
+            placeholder="sk-ant-..."
+          />
+          <button class="analysis-btn" id="analyzeBtn" onclick="runAnalysis()">
+            <span id="analyzeBtnText">✦ 开始分析</span>
+          </button>
+        </div>
+
+        <div
+          class="section-title"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 20px;
+          "
+        >
+          <span>日均摘要</span>
+          <div class="seg-ctrl" id="statsRangeSeg">
+            <button class="seg-btn active" onclick="setStatsRange(7, this)">
+              7天
+            </button>
+            <button class="seg-btn" onclick="setStatsRange(30, this)">
+              30天
+            </button>
+          </div>
+        </div>
+        <div class="analysis-card" id="statsCard"></div>
+      </div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottom-nav">
+      <button
+        class="bottom-nav-btn active"
+        id="nav-today"
+        onclick="switchTab('today')"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"
+          />
+        </svg>
+        今日
+      </button>
+      <button
+        class="bottom-nav-btn"
+        id="nav-calendar"
+        onclick="switchTab('calendar')"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        日历
+      </button>
+      <button
+        class="bottom-nav-btn"
+        id="nav-analysis"
+        onclick="switchTab('analysis')"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        分析
+      </button>
+    </div>
+
+    <!-- Add food modal -->
+    <div class="modal-bg" id="addModal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+        <div class="modal-title" id="modalMealTitle">添加食物</div>
+
+        <div
+          class="search-wrap"
+          style="display: flex; gap: 8px; align-items: center"
+        >
+          <input
+            class="search-input"
+            id="foodSearch"
+            placeholder="搜索食物…"
+            oninput="filterFoods()"
+            autocomplete="off"
+            style="flex: 1"
+          />
+          <button
+            onclick="toggleAiEstimate()"
+            id="aiEstimateToggle"
+            style="
+              flex-shrink: 0;
+              padding: 0 12px;
+              height: 42px;
+              background: var(--surface2);
+              border: 1.5px solid var(--border);
+              border-radius: 10px;
+              color: var(--accent2);
+              font-size: 12px;
+              font-weight: 600;
+              cursor: pointer;
+              white-space: nowrap;
+              transition: all 0.2s;
+            "
+          >
+            ✦ AI估算
+          </button>
+        </div>
+
+        <!-- AI estimate panel -->
+        <div id="aiEstimatePanel" style="display: none; margin-bottom: 8px">
+          <div
+            style="
+              background: var(--surface2);
+              border-radius: 10px;
+              padding: 12px;
+              border: 1px solid var(--border);
+            "
+          >
+            <div
+              style="font-size: 12px; color: var(--text3); margin-bottom: 8px"
+            >
+              描述你吃了什么，AI 会估算营养信息
+            </div>
+            <textarea
+              id="aiEstimateInput"
+              placeholder="例如：红烧肉三块约150g、米饭一碗、炒青菜半盘"
+              style="
+                width: 100%;
+                min-height: 64px;
+                padding: 8px 10px;
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: 8px;
+                color: var(--text);
+                font-size: 13px;
+                resize: none;
+                outline: none;
+                box-sizing: border-box;
+                font-family: &quot;DM Sans&quot;, sans-serif;
+                line-height: 1.5;
+              "
+              onfocus="this.style.borderColor = 'var(--accent2)'"
+              onblur="this.style.borderColor = 'var(--border)'"
+            ></textarea>
+            <button
+              onclick="runAiEstimate()"
+              id="aiEstimateBtn"
+              style="
+                width: 100%;
+                margin-top: 8px;
+                padding: 10px;
+                background: var(--accent2);
+                border: none;
+                border-radius: 8px;
+                color: #000;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+              "
+            >
+              估算营养
+            </button>
+          </div>
+          <!-- AI result preview -->
+          <div
+            id="aiEstimateResult"
+            style="
+              display: none;
+              margin-top: 8px;
+              background: var(--surface2);
+              border-radius: 10px;
+              padding: 12px;
+              border: 1.5px solid var(--accent2) 44;
+            "
+          ></div>
+        </div>
+        <div class="food-list" id="foodList"></div>
+
+        <span class="custom-toggle" onclick="toggleCustom()">+ 自定义食物</span>
+        <div id="customForm" style="display: none" class="custom-form">
+          <input
+            class="custom-input"
+            id="customName"
+            placeholder="食物名称"
+            autocomplete="off"
+          />
+          <div class="custom-row">
+            <input
+              class="custom-input"
+              id="customProtein"
+              type="number"
+              placeholder="蛋白质 g/100g"
+              min="0"
+            />
+            <input
+              class="custom-input"
+              id="customFat"
+              type="number"
+              placeholder="脂肪 g/100g"
+              min="0"
+            />
+          </div>
+          <div class="custom-row">
+            <input
+              class="custom-input"
+              id="customCarb"
+              type="number"
+              placeholder="碳水 g/100g"
+              min="0"
+            />
+            <input
+              class="custom-input"
+              id="customKcal"
+              type="number"
+              placeholder="热量 kcal/100g"
+              min="0"
+            />
+          </div>
+          <div style="font-size: 11px; color: var(--text3); margin-top: -2px">
+            热量留空则自动计算（蛋白×4 + 脂肪×9 + 碳水×4）
+          </div>
+          <button
+            class="confirm-btn"
+            style="background: var(--accent2); margin-bottom: 4px"
+            onclick="saveCustomFood()"
+          >
+            保存并添加 →
+          </button>
+        </div>
+
+        <div class="weight-row">
+          <input
+            class="weight-input"
+            id="weightInput"
+            type="number"
+            placeholder="100"
+            min="1"
+            max="9999"
+            oninput="updatePreview()"
+          />
+          <span class="weight-unit">g</span>
+        </div>
+        <div class="preview-bar">
+          <div class="preview-chip">
+            <div class="pv" id="pvProt" style="color: var(--protein)">—</div>
+            <div class="pl">蛋白质</div>
+          </div>
+          <div class="preview-chip">
+            <div class="pv" id="pvFat" style="color: var(--fat)">—</div>
+            <div class="pl">脂肪</div>
+          </div>
+          <div class="preview-chip">
+            <div class="pv" id="pvCarb" style="color: var(--carb)">—</div>
+            <div class="pl">碳水</div>
+          </div>
+          <div class="preview-chip">
+            <div class="pv" id="pvCal" style="color: var(--cal)">—</div>
+            <div class="pl">千卡</div>
+          </div>
+        </div>
+        <div id="microPreview"></div>
+        <button
+          class="confirm-btn"
+          id="confirmAddBtn"
+          onclick="confirmAdd()"
+          disabled
+        >
+          添加到餐食
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit weight modal -->
+    <div class="modal-bg" id="editModal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+        <div class="modal-title" id="editModalTitle">修改克重</div>
+        <div
+          style="font-size: 13px; color: var(--text2); margin-bottom: 14px"
+          id="editFoodName"
+        ></div>
+        <div class="weight-row">
+          <input
+            class="weight-input"
+            id="editWeightInput"
+            type="number"
+            placeholder="100"
+            min="1"
+            max="9999"
+            oninput="updateEditPreview()"
+          />
+          <span class="weight-unit">g</span>
+        </div>
+        <div class="preview-bar">
+          <div class="preview-chip">
+            <div class="pv" id="epvProt" style="color: var(--protein)">—</div>
+            <div class="pl">蛋白质</div>
+          </div>
+          <div class="preview-chip">
+            <div class="pv" id="epvFat" style="color: var(--fat)">—</div>
+            <div class="pl">脂肪</div>
+          </div>
+          <div class="preview-chip">
+            <div class="pv" id="epvCarb" style="color: var(--carb)">—</div>
+            <div class="pl">碳水</div>
+          </div>
+          <div class="preview-chip">
+            <div class="pv" id="epvCal" style="color: var(--cal)">—</div>
+            <div class="pl">千卡</div>
+          </div>
+        </div>
+        <button
+          class="confirm-btn"
+          id="confirmEditBtn"
+          onclick="saveEditItem()"
+        >
+          保存修改
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile modal -->
+    <div class="modal-bg" id="profileModal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('profileModal')">
+          ✕
+        </button>
+        <div class="modal-title">个人设置</div>
+        <div
+          class="profile-row"
+          style="
+            background: var(--surface2);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            margin-bottom: 4px;
+          "
+        >
+          <div class="profile-label" style="color: var(--accent)">用户 ID</div>
+          <input
+            class="profile-input"
+            id="pUserId"
+            type="text"
+            placeholder="英文小写+数字+下划线"
+            style="font-family: monospace"
+          />
+        </div>
+        <div
+          style="
+            font-size: 11px;
+            color: var(--text3);
+            margin: -4px 0 10px;
+            padding: 0 2px;
+          "
+        >
+          同一ID在任何设备数据互通
+        </div>
+
+        <div class="profile-row">
+          <div class="profile-label">身高 (cm)</div>
+          <input class="profile-input" id="pHeight" type="number" value="160" />
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">体重 (kg)</div>
+          <input class="profile-input" id="pWeight" type="number" value="60" />
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">目标热量 (kcal/天)</div>
+          <input
+            class="profile-input"
+            id="pCalTarget"
+            type="number"
+            value="1450"
+          />
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">蛋白质目标 (g/天)</div>
+          <input
+            class="profile-input"
+            id="pProtTarget"
+            type="number"
+            value="65"
+          />
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">脂肪目标 (g/天)</div>
+          <input
+            class="profile-input"
+            id="pFatTarget"
+            type="number"
+            value="48"
+          />
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">碳水目标 (g/天)</div>
+          <input
+            class="profile-input"
+            id="pCarbTarget"
+            type="number"
+            value="160"
+          />
+        </div>
+        <!-- 训练强度系数 -->
+        <div class="profile-row" style="margin-top: 4px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: baseline;
+            "
+          >
+            <div class="profile-label">训练强度系数</div>
+            <div style="font-size: 11px; color: var(--text3)">
+              影响训练日营养配额
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-top: 6px;
+            "
+          >
+            <input
+              type="range"
+              id="pWorkoutIntensity"
+              min="1"
+              max="10"
+              step="0.5"
+              value="5"
+              oninput="
+                document.getElementById('pIntensityVal').textContent =
+                  this.value
+              "
+              style="flex: 1; accent-color: var(--accent2); cursor: pointer"
+            />
+            <span
+              id="pIntensityVal"
+              style="
+                font-size: 20px;
+                font-weight: 700;
+                color: var(--accent2);
+                min-width: 28px;
+                text-align: right;
+              "
+              >5</span
+            >
+          </div>
+          <div
+            id="pIntensityPreview"
+            style="
+              font-size: 11px;
+              color: var(--text3);
+              margin-top: 4px;
+              line-height: 1.6;
+            "
+          ></div>
+        </div>
+        <!-- 自定义指标 -->
+        <div
+          style="
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+          "
+        >
+          <div
+            class="profile-label"
+            style="margin-bottom: 10px; color: var(--text2)"
+          >
+            自定义追踪指标
+          </div>
+          <div id="trackerSettingsContainer">
+            <div style="font-size: 12px; color: var(--text3)">加载中…</div>
+          </div>
+        </div>
+        <!-- 补剂管理 -->
+        <div
+          style="
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+          "
+        >
+          <div
+            class="profile-label"
+            style="margin-bottom: 10px; color: var(--text2)"
+          >
+            今日补剂
+          </div>
+          <div id="suppSettingsContainer">
+            <div style="font-size: 12px; color: var(--text3)">加载中…</div>
+          </div>
+        </div>
+        <!-- 经期记录 -->
+        <div
+          style="
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+          "
+        >
+          <div
+            class="profile-label"
+            style="margin-bottom: 10px; color: var(--text2)"
+          >
+            经期记录
+          </div>
+          <div id="periodSettingsContainer">
+            <div style="font-size: 12px; color: var(--text3)">加载中…</div>
+          </div>
+        </div>
+        <button class="confirm-btn" onclick="saveProfile()">保存</button>
+      </div>
+    </div>
+
+    <!-- Tracker modal -->
+    <div class="modal-bg" id="trackerModal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('trackerModal')">
+          &#x2715;
+        </button>
+        <div class="modal-title" id="trackerModalTitle">记录指标</div>
+        <div id="trackerFields" style="margin-bottom: 20px"></div>
+        <button class="confirm-btn" onclick="saveTrackerRecord()">
+          保存记录
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Result modal -->
+    <div class="modal-bg" id="aiModal">
+      <div class="ai-modal">
+        <button class="modal-close" onclick="closeModal('aiModal')">
+          &#x2715;
+        </button>
+        <div class="modal-title">✦ AI 营养分析</div>
+        <div class="analysis-result" id="analysisResult">
+          <div style="color: var(--text3); text-align: center; padding: 40px 0">
+            <span class="spinner"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 食物数据库 - 修改食物请编辑 data.js -->
+    <script src="data.js"></script>
+
+    <script>
+      const MEALS = ["早餐", "午餐", "晚餐", "加餐"];
+      const DAYS_CN = ["日", "一", "二", "三", "四", "五", "六"];
+      // sb 由 storage.js 自动创建并挂载到 window.sb（Supabase 模式下）
+      // 本地模式下 window.sb = null，所有操作通过 window.Storage 进行
+
+      function getDeviceId() {
+        return localStorage.getItem("_diet_user_id") || null;
+      }
+      let DEVICE_ID = getDeviceId();
+
+      function setUserId(id) {
+        id = id
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9_]/g, "");
+        if (!id) return false;
+        localStorage.setItem("_diet_user_id", id);
+        DEVICE_ID = id;
+        return true;
+      }
+
+      // ── Global state ──────────────────────────────────────────────────
+      let selectedDate = todayStr();
+      let currentMeal = "早餐";
+      let selectedFood = null;
+      let currentTab = "today";
+      let calYear, calMonth;
+      let chartRange = 7;
+      let statsRange = 7;
+
+      // Shared caches (used by db.js and other modules)
+      const _dayDataCache = {};
+      const _monthFetched = new Set();
+
+      function todayStr() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+
+      function mealKey(name) {
+        return {
+          早餐: "breakfast",
+          午餐: "lunch",
+          晚餐: "dinner",
+          加餐: "snack",
+        }[name];
+      }
+
+      function hasData(ds) {
+        return _dayDataCache[ds]
+          ? Object.values(_dayDataCache[ds]).some((arr) => arr.length > 0)
+          : false;
+      }
+
+      // ── Modal helpers ─────────────────────────────────────────────────
+      function openModal(id) {
+        document.getElementById(id).classList.add("open");
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
+      document.querySelectorAll(".modal-bg").forEach((bg) =>
+        bg.addEventListener("click", (e) => {
+          if (e.target === bg) bg.classList.remove("open");
+        }),
+      );
+
+      // ── Calendar dot providers ────────────────────────────────────────
+      const _dotProviders = [];
+      async function getDayDots(ds) {
+        let out = "";
+        if (await hasData(ds)) out += '<div class="cal-dot dot-diet"></div>';
+        for (const fn of _dotProviders) out += (await fn(ds)) || "";
+        return out;
+      }
+
+      // ── Sub-tab switcher ──────────────────────────────────────────────
+      let currentSub = "diet";
+      function switchSub(sub) {
+        currentSub = sub;
+        ["diet", "workout", "sleep"].forEach((s) => {
+          document
+            .getElementById("sub-" + s)
+            .classList.toggle("active", s === sub);
+          document
+            .getElementById("subcontent-" + s)
+            .classList.toggle("active", s === sub);
+        });
+        if (sub === "workout" && typeof renderWorkout === "function")
+          renderWorkout(selectedDate);
+        if (sub === "sleep" && typeof renderSleep === "function")
+          renderSleep(selectedDate);
+      }
+
+      // ── Tabs ──────────────────────────────────────────────────────────
+      async function switchTab(tab) {
+        if (tab === "today") switchSub("diet");
+        currentTab = tab;
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.remove("active"));
+        document
+          .querySelectorAll(".bottom-nav-btn")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById("tab-" + tab).classList.add("active");
+        document.getElementById("nav-" + tab).classList.add("active");
+        if (tab === "calendar") await renderCalendar();
+        if (tab === "analysis") {
+          await renderStats();
+          const apikey = await Storage.getSetting(DEVICE_ID, "apikey");
+          if (apikey) document.getElementById("apiKeyInput").value = apikey;
+          setTimeout(drawChart, 80);
+          setTimeout(renderTrackerChart, 120);
+        }
+      }
+
+      // ── Date strip ────────────────────────────────────────────────────
+      async function renderDateStrip() {
+        const strip = document.getElementById("dateStrip");
+        strip.innerHTML = "";
+        const today = new Date();
+        const dates = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(today);
+          d.setDate(today.getDate() - i);
+          const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          dates.push({ d, ds });
+        }
+        await Promise.all(
+          dates.map(async ({ ds }) => {
+            if (!_dayDataCache[ds]) _dayDataCache[ds] = await getDayData(ds);
+          }),
+        );
+        dates.forEach(({ d, ds }) => {
+          const chip = document.createElement("button");
+          chip.className =
+            "date-chip" +
+            (ds === selectedDate ? " active" : "") +
+            (hasData(ds) && ds !== selectedDate ? " has-data" : "");
+          chip.innerHTML = `<span class="day-name">${DAYS_CN[d.getDay()]}</span><span class="day-num">${d.getDate()}</span>`;
+          chip.onclick = async () => {
+            selectedDate = ds;
+            await renderDateStrip();
+            await renderTodayTab();
+            renderHeaderDate();
+            if (currentSub === "workout" && typeof renderWorkout === "function")
+              renderWorkout(selectedDate);
+            if (currentSub === "sleep" && typeof renderSleep === "function")
+              renderSleep(selectedDate);
+          };
+          strip.appendChild(chip);
+        });
+        strip.scrollLeft = strip.scrollWidth;
+      }
+
+      function renderHeaderDate() {
+        const d = new Date(selectedDate + "T00:00:00");
+        document.getElementById("headerDate").textContent =
+          d.toLocaleDateString("zh-CN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            weekday: "long",
+          });
+      }
+
+      async function loadCustomFoods() {
+        const c = await Storage.getCustomFoods(DEVICE_ID);
+        c.forEach((f) => {
+          if (!FOOD_DB.find((x) => x.name === f.name)) FOOD_DB.push(f);
+        });
+      }
+
+      // ── Auth helpers ──────────────────────────────────────────────────
+      let GUEST_MODE = false;
+
+      async function sha256(str) {
+        const buf = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(str),
+        );
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      async function getStoredHash(id) {
+        try {
+          return await Storage.getStoredHash(id);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      async function storeHash(id, hash) {
+        await Storage.storeHash(id, hash);
+      }
+
+      // Show confirm field as user types password
+      function _onPwdInput() {
+        const hasPwd = document.getElementById("loginPwd").value.length > 0;
+        document.getElementById("loginConfirmWrap").style.display = hasPwd
+          ? ""
+          : "none";
+        if (!hasPwd) document.getElementById("loginPwdConfirm").value = "";
+      }
+
+      async function doLogin() {
+        const id = document.getElementById("loginId").value.trim();
+        const pwd = document.getElementById("loginPwd").value;
+        const pwdConfirm = document.getElementById("loginPwdConfirm").value;
+        const errEl = document.getElementById("loginErr");
+        const btn = document.getElementById("loginBtn");
+
+        if (!id) {
+          errEl.textContent = "请输入用户 ID";
+          return;
+        }
+
+        // No password — open access, just go in
+        if (!pwd) {
+          setUserId(id);
+          localStorage.setItem("_diet_authed", "1");
+          _showApp();
+          return;
+        }
+
+        if (pwd.length < 4) {
+          errEl.textContent = "密码至少 4 位";
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "验证中…";
+        errEl.textContent = "";
+
+        try {
+          const stored = await getStoredHash(id);
+          const hash = await sha256(id + ":" + pwd);
+
+          if (stored === null) {
+            // First time setting password for this ID
+            if (!pwdConfirm) {
+              document.getElementById("loginConfirmWrap").style.display = "";
+              document.getElementById("loginPwdConfirm").focus();
+              errEl.textContent = "请再次输入密码确认";
+              btn.disabled = false;
+              btn.textContent = "进入";
+              return;
+            }
+            if (pwd !== pwdConfirm) {
+              errEl.textContent = "两次密码不一致";
+              btn.disabled = false;
+              btn.textContent = "进入";
+              return;
+            }
+            await storeHash(id, hash);
+          } else {
+            if (hash !== stored) {
+              errEl.textContent = "密码错误";
+              btn.disabled = false;
+              btn.textContent = "进入";
+              return;
+            }
+          }
+
+          setUserId(id);
+          localStorage.setItem("_diet_authed", "1");
+          _showApp();
+        } catch (e) {
+          errEl.textContent = "网络错误，请重试";
+          btn.disabled = false;
+          btn.textContent = "进入";
+        }
+      }
+
+      async function _appInit() {
+        const now = new Date();
+        calYear = now.getFullYear();
+        calMonth = now.getMonth();
+        await loadCustomFoods();
+        renderDateStrip();
+        await renderTodayTab();
+        renderHeaderDate();
+        await loadProfile();
+      }
+
+      function _showApp() {
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("mainApp").style.display = "";
+        _appInit();
+      }
+
+      async function init() {
+        // Already authed on this device
+        if (DEVICE_ID && localStorage.getItem("_diet_authed") === "1") {
+          _showApp();
+          return;
+        }
+        // Pre-fill random ID for new users
+        const words = [
+          "swift",
+          "calm",
+          "bold",
+          "keen",
+          "pure",
+          "cool",
+          "wise",
+          "bright",
+          "clear",
+          "fresh",
+        ];
+        const preset =
+          DEVICE_ID ||
+          words[Math.floor(Math.random() * words.length)] +
+            Math.floor(100 + Math.random() * 900);
+        document.getElementById("loginId").value = preset;
+      }
+
+      // init() 在所有脚本加载完后执行（见底部）
+    </script>
+    <!-- Supabase SDK（仅在 config.js 配置了 key 时才有效）-->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 用户配置：填写你自己的 Supabase key（或留空使用本地存储）-->
+    <script src="config.js"></script>
+    <!-- 存储适配器：根据 config.js 自动选择本地/云端模式 -->
+    <script src="js/storage.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/diet.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/analysis.js"></script>
+    <script src="js/tracker.js"></script>
+    <script src="js/workout.js"></script>
+    <script src="js/sleep.js"></script>
+    <script src="js/period.js"></script>
+    <script>
+      // 所有脚本加载完毕，现在可以安全调用 init()
+      init();
+    </script>
+  </body>
+</html>

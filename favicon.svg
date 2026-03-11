@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="16" fill="#0f0f0f"/>
+  
+  <!-- Ring (calorie ring style) -->
+  <circle cx="16" cy="16" r="10" fill="none" stroke="#2a2a2a" stroke-width="3"/>
+  <circle cx="16" cy="16" r="10" fill="none" stroke="#c8f060" stroke-width="3"
+    stroke-dasharray="47 16" stroke-dashoffset="6"
+    stroke-linecap="round"/>
+  
+  <!-- Fork icon in center -->
+  <g fill="#c8f060" transform="translate(16,16)">
+    <!-- Fork handle -->
+    <rect x="-1" y="1" width="2" height="6" rx="1"/>
+    <!-- Fork tines -->
+    <rect x="-3.5" y="-7" width="1.2" height="5" rx="0.6"/>
+    <rect x="-0.6" y="-7" width="1.2" height="5" rx="0.6"/>
+    <rect x="2.3" y="-7" width="1.2" height="5" rx="0.6"/>
+    <!-- Fork neck -->
+    <rect x="-1" y="-2.5" width="2" height="3.5" rx="0.6"/>
+  </g>
+</svg>
